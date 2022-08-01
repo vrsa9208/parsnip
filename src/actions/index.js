@@ -60,7 +60,7 @@ export function createTaskSucceeded(task) {
       analytics: {
         event: "create_task",
         data: {
-          id: task.id,
+          ...task,
         },
       },
     },

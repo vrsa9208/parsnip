@@ -1,20 +1,8 @@
 import * as api from "../api";
 
 export function fetchTasks() {
-  return (dispatch) => {
-    dispatch(fetchTasksStarted());
-
-    api
-      .fetchTasks()
-      .then((response) => {
-        setTimeout(() => {
-          dispatch(fetchTasksSucceeded(response.data));
-        }, 2000);
-        // throw new Error("Unable to fetch tasks");
-      })
-      .catch((error) => {
-        dispatch(fetchTasksFailed(error.message));
-      });
+  return {
+    type: "FETCH_TASKS_STARTED",
   };
 }
 
@@ -67,10 +55,23 @@ export function createTaskSucceeded(task) {
   };
 }
 
+function progressTimerStart(taskId) {
+  return { type: "TIMER_STARTED", payload: { taskId } };
+}
+
+function progressTimerStop(taskId) {
+  return { type: "TIMER_STOPPED", payload: { taskId } };
+}
+
 export function updateTask({ id, ...task }) {
   return (dispatch) => {
     api.updateTask(id, task).then((response) => {
       dispatch(updateTaskSucceeded(response.data));
+      if (response.data.status === "In Progress") {
+        dispatch(progressTimerStart(response.data.id));
+      } else {
+        dispatch(progressTimerStop(response.data.id));
+      }
     });
   };
 }

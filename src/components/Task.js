@@ -17,6 +17,7 @@ const Task = (props) => {
         <option value="In Progress">In Progress</option>
         <option value="Completed">Completed</option>
       </select>
+      <div className="task-timer">{props.task.timer}s</div>
     </div>
   );
 };

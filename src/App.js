@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { createTask, fetchTasks, updateTask } from "./actions";
+import { createTask, fetchTasks, updateTask, filterTasks } from "./actions";
 import TasksPage from "./components/TasksPage";
 import FlashMessage from "./components/FlashMessage";
+import { getFilteredTasks, getGroupedTasks } from "./reducers";
 
 class App extends Component {
   componentDidMount() {
@@ -17,6 +18,10 @@ class App extends Component {
     this.props.dispatch(updateTask(task));
   };
 
+  onSearch = (searchTerm) => {
+    this.props.dispatch(filterTasks(searchTerm));
+  };
+
   render() {
     return (
       <div className="main-content">
@@ -25,8 +30,10 @@ class App extends Component {
         ) : (
           <TasksPage
             tasks={this.props.tasks}
+            groupedTasks={this.props.groupedTasks}
             onCreateTask={this.onCreateTask}
             onUpdateTask={this.onUpdateTask}
+            onSearch={this.onSearch}
             isLoading={this.props.isLoading}
           />
         )}
@@ -36,10 +43,13 @@ class App extends Component {
 }
 
 function mapStateToProps(state) {
+  const { isLoading, error } = state.tasks;
+
   return {
-    tasks: state.tasks.tasks,
-    isLoading: state.tasks.isLoading,
-    error: state.tasks.error,
+    tasks: getFilteredTasks(state),
+    groupedTasks: getGroupedTasks(state),
+    isLoading,
+    error,
   };
 }
 

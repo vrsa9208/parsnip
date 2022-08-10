@@ -9,7 +9,7 @@ import {
 } from "./actions";
 import TasksPage from "./components/TasksPage";
 import FlashMessage from "./components/FlashMessage";
-import { getGroupedAndFilteredTasks } from "./reducers";
+import { getGroupedAndFilteredTasks, getProjects } from "./reducers";
 import Header from "./components/Header";
 
 class App extends Component {
@@ -60,11 +60,11 @@ class App extends Component {
 }
 
 function mapStateToProps(state) {
-  const { isLoading, error, items } = state.projects;
+  const { isLoading, error } = state.projects;
 
   return {
     tasks: getGroupedAndFilteredTasks(state),
-    projects: items,
+    projects: getProjects(state),
     isLoading,
     error,
   };

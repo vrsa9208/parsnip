@@ -1,20 +1,100 @@
 import { createSelector } from "reselect";
 import { TASK_STATUSES } from "../constants";
 
-const initialState = {
+const initialTasksState = {
   items: [],
-  error: null,
   isLoading: false,
+  error: null,
 };
 
-export function projects(state = initialState, action) {
+export function tasks(state = initialTasksState, action) {
   switch (action.type) {
-    case "FETCH_PROJECTS_STARTED":
-      return { ...state, isLoading: true };
-    case "FETCH_PROJECTS_SUCCEEDED":
-      return { ...state, isLoading: false, items: action.payload.projects };
-    default:
+    case "RECEIVE_ENTITIES": {
+      const { entities } = action.payload;
+      if (entities && entities.tasks) {
+        return {
+          ...state,
+          isLoading: false,
+          items: entities.tasks,
+        };
+      }
+
       return state;
+    }
+    case "TIMER_INCREMENT": {
+      const nextTasks = Object.keys(state.items).map((taskId) => {
+        const task = state.items[taskId];
+
+        if (task.id === action.payload.taskId) {
+          return { ...task, timer: task.timer + 1 };
+        }
+
+        return task;
+      });
+      return {
+        ...state,
+        tasks: nextTasks,
+      };
+    }
+    case "CREATE_TASK_SUCCEEDED": {
+      const { task } = action.payload;
+
+      const nextTasks = {
+        ...state.items,
+        [task.id]: task,
+      };
+
+      return {
+        ...state,
+        items: nextTasks,
+      };
+    }
+    default: {
+      return state;
+    }
+  }
+}
+
+const initialProjectsState = {
+  items: {},
+  isLoading: false,
+  error: null,
+};
+
+export function projects(state = initialProjectsState, action) {
+  switch (action.type) {
+    case "RECEIVE_ENTITIES": {
+      const { entities } = action.payload;
+      if (entities && entities.projects) {
+        return {
+          ...state,
+          isLoading: false,
+          items: entities.projects,
+        };
+      }
+
+      return state;
+    }
+    case "CREATE_TASK_SUCCEEDED": {
+      const { task } = action.payload;
+
+      const project = state.items[task.projectId];
+
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [task.projectId]: {
+            ...project,
+            tasks: project.tasks.concat(task.id),
+          },
+        },
+      };
+    }
+
+    default: {
+      return state;
+    }
   }
 }
 
@@ -42,16 +122,22 @@ export function page(state = initialPageState, action) {
 
 const getSearchTerm = (state) => state.page.searchTerm;
 
+export const getProjects = (state) => {
+  return Object.keys(state.projects.items).map((id) => {
+    return state.projects.items[id];
+  });
+};
+
 const getTasksByProjectId = (state) => {
-  if (!state.page.currentProjectId) {
+  const { currentProjectId } = state.page;
+
+  if (!currentProjectId || !state.projects.items[currentProjectId]) {
     return [];
   }
 
-  const currentProject = state.projects.items.find(
-    (project) => project.id === state.page.currentProjectId
-  );
+  const taskIds = state.projects.items[currentProjectId].tasks;
 
-  return currentProject.tasks;
+  return taskIds.map((id) => state.tasks.items[id]);
 };
 
 export const getFilteredTasks = createSelector(

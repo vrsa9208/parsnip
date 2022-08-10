@@ -1,4 +1,8 @@
 import * as api from "../api";
+import { schema, normalize } from "normalizr";
+
+const taskSchema = new schema.Entity("tasks");
+const projectSchema = new schema.Entity("projects", { tasks: [taskSchema] });
 
 export function fetchTasks() {
   return {
@@ -106,6 +110,13 @@ function fetchProjectsFailed(err) {
   return { type: "FETCH_PROJECTS_FAILED", payload: err };
 }
 
+function receiveEntities(entities) {
+  return {
+    type: "RECEIVE_ENTITIES",
+    payload: entities,
+  };
+}
+
 export function fetchProjects() {
   return (dispatch, getState) => {
     dispatch(fetchProjectsStarted());
@@ -115,7 +126,14 @@ export function fetchProjects() {
       .then((resp) => {
         const projects = resp.data;
 
-        dispatch(fetchProjectsSucceeded(projects));
+        const normalizedData = normalize(projects, [projectSchema]);
+
+        dispatch(receiveEntities(normalizedData));
+
+        if (!getState().page.currentProjectId) {
+          const defaultProjectId = projects[0].id;
+          dispatch(setCurrentProjectId(defaultProjectId));
+        }
       })
       .catch((err) => {
         console.error(err);

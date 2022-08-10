@@ -41,11 +41,11 @@ class TasksPage extends Component {
   };
 
   renderTaskLists() {
-    return Object.keys(this.props.groupedTasks).map((status) => (
+    return Object.keys(this.props.tasks).map((status) => (
       <TaskList
         key={status}
         status={status}
-        tasks={this.props.groupedTasks[status]}
+        tasks={this.props.tasks[status]}
         onUpdateTask={this.props.onUpdateTask}
       />
     ));

@@ -20,3 +20,7 @@ export function createTasks(params) {
 export function updateTask(id, params) {
   return client.put(`/tasks/${id}`, params);
 }
+
+export function fetchProjects() {
+  return client.get("/projects?_embed=tasks");
+}

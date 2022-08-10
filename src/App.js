@@ -1,13 +1,20 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { createTask, fetchTasks, updateTask, filterTasks } from "./actions";
+import {
+  createTask,
+  fetchProjects,
+  updateTask,
+  filterTasks,
+  setCurrentProjectId,
+} from "./actions";
 import TasksPage from "./components/TasksPage";
 import FlashMessage from "./components/FlashMessage";
-import { getFilteredTasks, getGroupedTasks } from "./reducers";
+import { getGroupedAndFilteredTasks } from "./reducers";
+import Header from "./components/Header";
 
 class App extends Component {
   componentDidMount() {
-    this.props.dispatch(fetchTasks());
+    this.props.dispatch(fetchProjects());
   }
 
   onCreateTask = ({ title, description }) => {
@@ -22,20 +29,30 @@ class App extends Component {
     this.props.dispatch(filterTasks(searchTerm));
   };
 
+  onCurrentProjectChange = (e) => {
+    this.props.dispatch(setCurrentProjectId(Number(e.target.value)));
+  };
+
   render() {
     return (
       <div className="main-content">
         {this.props.error ? (
           <FlashMessage message={this.props.error} />
         ) : (
-          <TasksPage
-            tasks={this.props.tasks}
-            groupedTasks={this.props.groupedTasks}
-            onCreateTask={this.onCreateTask}
-            onUpdateTask={this.onUpdateTask}
-            onSearch={this.onSearch}
-            isLoading={this.props.isLoading}
-          />
+          <>
+            <Header
+              projects={this.props.projects}
+              onCurrentProjectChange={this.onCurrentProjectChange}
+            />
+            <TasksPage
+              tasks={this.props.tasks}
+              groupedTasks={this.props.groupedTasks}
+              onCreateTask={this.onCreateTask}
+              onUpdateTask={this.onUpdateTask}
+              onSearch={this.onSearch}
+              isLoading={this.props.isLoading}
+            />
+          </>
         )}
       </div>
     );
@@ -43,11 +60,11 @@ class App extends Component {
 }
 
 function mapStateToProps(state) {
-  const { isLoading, error } = state.tasks;
+  const { isLoading, error, items } = state.projects;
 
   return {
-    tasks: getFilteredTasks(state),
-    groupedTasks: getGroupedTasks(state),
+    tasks: getGroupedAndFilteredTasks(state),
+    projects: items,
     isLoading,
     error,
   };

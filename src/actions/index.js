@@ -36,7 +36,8 @@ export function fetchTasksFailed(error) {
 
 export function createTask({ title, description, status = "Unstarted" }) {
   return (dispatch) => {
-    api.createTasks({ title, description, status }).then((response) => {
+    console.log("api", api.createTask({}));
+    return api.createTask({ title, description, status }).then((response) => {
       dispatch(createTaskSucceeded(response.data));
     });
   };
@@ -48,14 +49,14 @@ export function createTaskSucceeded(task) {
     payload: {
       task,
     },
-    meta: {
-      analytics: {
-        event: "create_task",
-        data: {
-          ...task,
-        },
-      },
-    },
+    // meta: {
+    //   analytics: {
+    //     event: "create_task",
+    //     data: {
+    //       ...task,
+    //     },
+    //   },
+    // },
   };
 }
 

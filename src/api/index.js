@@ -13,7 +13,7 @@ export function fetchTasks() {
   return client.get("/tasks");
 }
 
-export function createTasks(params) {
+export function createTask(params) {
   return client.post("/tasks", params);
 }
 

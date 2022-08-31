@@ -1,3 +1,5 @@
+import { fakeAnalyticsApi } from "./exampleService";
+
 const analytics = (store) => (next) => (action) => {
   if (!action || !action.meta || !action.meta.analytics) {
     return next(action);
@@ -17,12 +19,6 @@ const analytics = (store) => (next) => (action) => {
     });
 
   return next(action);
-};
-
-const fakeAnalyticsApi = (eventName, data) => {
-  return new Promise((resolve) => {
-    resolve("Success");
-  });
 };
 
 export default analytics;
